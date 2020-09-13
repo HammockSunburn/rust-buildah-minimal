@@ -7,7 +7,7 @@ if [ "$(whoami)" != "root" ]; then
 fi
 
 # The first container/mount is where we'll run the Rust build.
-buildcntr1=$(buildah from rust:1.44)
+buildcntr1=$(buildah from rust:1.46)
 buildmnt1=$(buildah mount $buildcntr1)
 
 # Get the Rust build container ready to build with musl. The Rust container image is Debian based.
