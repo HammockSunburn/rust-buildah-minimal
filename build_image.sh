@@ -1,13 +1,8 @@
 #!/bin/bash
 set -e
 
-if [ "$(whoami)" != "root" ]; then
-    echo "script must be run as root"
-    exit 1
-fi
-
 # The first container/mount is where we'll run the Rust build.
-buildcntr1=$(buildah from rust:1.46)
+buildcntr1=$(buildah from docker.io/library/rust:latest)
 buildmnt1=$(buildah mount $buildcntr1)
 
 # Get the Rust build container ready to build with musl. The Rust container image is Debian based.
@@ -23,7 +18,7 @@ cp -R src $buildmnt1
 RUSTFLAGS=-Clinker=musl-gcc buildah run $buildcntr1 cargo build --release --target=x86_64-unknown-linux-musl
 
 # The second container/mount is where we'll prepare our output container image.
-buildcntr2=$(buildah from alpine)
+buildcntr2=$(buildah from docker.io/library/alpine:latest)
 buildmnt2=$(buildah mount $buildcntr2)
 
 # We'll make a directory, /app, where we'll store our application binary.
@@ -39,4 +34,3 @@ buildah config --cmd "/app/rust-buildah-minimal -c /app/config.toml" $buildcntr2
 buildah umount $buildcntr2
 buildah commit $buildcntr2 rust-buildah-minimal:latest
 buildah rm $buildcntr1 $buildcntr2
-
